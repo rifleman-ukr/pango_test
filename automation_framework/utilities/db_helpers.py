@@ -10,7 +10,6 @@ class DatabaseHelper:
 
     def terminate_db(self):
         self.conn.close()
-        os.remove(config.get("DB", "DB_NAME"))
 
     def create_tables(self):
         # Create tables if they don't exist
@@ -25,12 +24,24 @@ class DatabaseHelper:
         args_names = tuple(kwargs.keys())
         args_values = tuple(kwargs.values())
         if "average" in kwargs:
-            self.cursor.execute(f"PRAGMA table_info(weather_data)")
-            columns = self.cursor.fetchall()
-            if not any(column[1] == "average" for column in columns):
-                self.cursor.execute(f'''ALTER TABLE weather_data ADD COLUMN average REAL ''')
+            self.add_column("average")
         self.cursor.execute(f'''INSERT OR REPLACE INTO weather_data {args_names} 
         VALUES {args_values}''')
+        self.conn.commit()
+
+    def add_column(self, name):
+        self.cursor.execute(f"PRAGMA table_info(weather_data)")
+        columns = self.cursor.fetchall()
+        if not any(column[1] == name for column in columns):
+            self.cursor.execute(f'''ALTER TABLE weather_data ADD COLUMN {name} REAL ''')
+
+    def update_weather_data(self, **kwargs):
+        set_clause = ", ".join([f"{key} = ?" for key in tuple(kwargs.keys()) if key != 'city'])
+        parameters = [kwargs[key] for key in kwargs.keys() if key != 'city']
+        parameters.append(kwargs['city'].capitalize())
+        if "app_temp" in kwargs:
+            self.add_column("app_temp")
+        self.cursor.execute(f'''UPDATE weather_data SET {set_clause} WHERE city = ?''', parameters)
         self.conn.commit()
 
     def get_weather_data(self, city):

@@ -2,11 +2,12 @@ import os
 
 import pytest
 from appium import webdriver
+from appium.options.android import UiAutomator2Options
 
 from automation_framework.utilities.api_helpers import ApiHelper
-from automation_framework.utilities.db_helpers import DatabaseHelper
 from automation_framework.utilities.config import config
-from appium.options.android import UiAutomator2Options
+from automation_framework.utilities.db_helpers import DatabaseHelper
+
 
 @pytest.fixture(scope="module")
 def api():

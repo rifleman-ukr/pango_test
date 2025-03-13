@@ -2,8 +2,10 @@ import json
 
 import pytest
 
+from automation_framework.config.test_data import TestData
 
-@pytest.mark.parametrize("city", ["kyiv", ("kyiv", "lviv")])
+
+@pytest.mark.parametrize("city", [TestData.cities[0], TestData.cities])
 def test_get_weather_data(api, db, city):
     weather = api.get_current_weather(city)
     for item in weather:
@@ -20,7 +22,7 @@ def test_get_weather_data(api, db, city):
         assert stored_temp["feels_like"] == data["main"]["feels_like"], \
             "Stored feels like temperature should be same as in response"
 
-@pytest.mark.parametrize("city_id", ["703448", ("703448", "702550")])
+@pytest.mark.parametrize("city_id", [TestData.city_ids[0], TestData.city_ids])
 def test_get_weather_by_id(api, db, city_id):
     weather = api.get_current_weather(city_id, method='id')
     for item in weather:
